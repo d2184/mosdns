@@ -28,6 +28,11 @@ envs = [
     [['GOOS', 'linux'], ['GOARCH', 'arm'], ['GOARM', '7']],
     [['GOOS', 'linux'], ['GOARCH', 'arm64']],
 
+    [['GOOS', 'linux'], ['GOARCH', 'amd64'], ['GOAMD64', 'v3']],
+
+    #Android arm64
+    [['GOOS', 'android'], ['GOARCH', 'arm64']],
+
     # [['GOOS', 'linux'], ['GOARCH', 'mips'], ['GOMIPS', 'hardfloat']],
     # [['GOOS', 'linux'], ['GOARCH', 'mips'], ['GOMIPS', 'softfloat']],
     # [['GOOS', 'linux'], ['GOARCH', 'mipsle'], ['GOMIPS', 'hardfloat']],
@@ -45,8 +50,8 @@ envs = [
 
     # [['GOOS', 'windows'], ['GOARCH', '386']],
     [['GOOS', 'windows'], ['GOARCH', 'amd64']],
+    [['GOOS', 'windows'], ['GOARCH', 'amd64'], ['GOAMD64', 'v3']],
 ]
-
 
 def go_build():
     logger.info(f'building {PROJECT_NAME}')
@@ -57,7 +62,7 @@ def go_build():
 
     VERSION = 'dev/unknown'
     try:
-        VERSION = subprocess.check_output('git describe --tags --long --always', shell=True).decode().rstrip()
+        VERSION = subprocess.check_output('git describe --tags $(git rev-list --tags --max-count=1)', shell=True).decode().rstrip()
     except subprocess.CalledProcessError as e:
         logger.error(f'get git tag failed: {e.args}')
 

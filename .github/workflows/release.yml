@@ -2,28 +2,47 @@ name: Release mosdns
 
 on:
   push:
+    paths-ignore:
+      - ".gitignore"
+      - ".gitattributes"
+      - "LICENSE"
+      - "README.md"
+      - '.github/**'
     tags:
       - 'v*'
+
+concurrency: 
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+env: 
+    TZ: Asia/Hong_Kong
 
 jobs:
 
   build-release:
     runs-on: ubuntu-latest
     steps:
+      - name: Workflow runs delete
+        uses: InfraWay/delete-workflow-runs@v2.1.2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 7
+
       - uses: actions/checkout@v3
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
-          go-version: 1.19
-          check-latest: true
+          go-version-file: ./go.mod
           cache: true
 
       - name: Test
         run: go test -race -v ./...
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.8'
 
@@ -36,6 +55,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: './release/mosdns*.zip'
-          prerelease: true
+          prerelease: false
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
